@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
+import { compose } from 'recompose';
 
 import { withFirebase } from '../Firebase';
+import { withAuthorization } from '../Session';
+import * as ROLES from '../../constants/roles';
 
 class AdminPage extends Component {
   constructor(props) {
@@ -19,12 +22,9 @@ class AdminPage extends Component {
       const usersObject = snapshot.val();
 
       const usersList = Object.keys(usersObject).map(key => ({
-          ...usersObject[key],
-          uid: key,
-        }));
-      console.log(usersObject)
-      console.log(usersList)
-      console.log(JSON.stringify(usersList))
+        ...usersObject[key],
+        uid: key,
+      }));
 
       this.setState({
         users: usersList,
@@ -33,17 +33,20 @@ class AdminPage extends Component {
     });
   }
 
-  componentWillMount() {
+  componentWillUnmount() {
     this.props.firebase.users().off();
   }
 
   render() {
     const { users, loading } = this.state;
-    console.log(users);
 
     return (
       <div>
         <h1>Admin</h1>
+        <p>
+          The Admin Page is accessible by every signed in admin User.
+        </p>
+
         { loading && <div>Loading ...</div> }
 
         <UserList users={users} />
@@ -66,8 +69,11 @@ const UserList = ({ users }) => (
           <strong>Username:</strong> {user.username}
         </span>
       </li>
-      ))}
+    ))}
   </ul>
 );
 
-export default withFirebase(AdminPage);
+const condition = authUser =>
+  authUser && authUser.roles.includes(ROLES.ADMIN);
+
+export default compose(withAuthorization(condition), withFirebase,)(AdminPage);
