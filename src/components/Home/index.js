@@ -64,6 +64,10 @@ class MessagesBase extends Component {
     event.preventDefault();
   };
 
+  onRemoveMessage = uid => {
+    this.props.firebase.message(uid).remove();
+  };
+
   render() {
     const { text, messages, loading } =  this.state;
 
@@ -74,7 +78,7 @@ class MessagesBase extends Component {
             {loading && <div>Loading ...</div>}
 
             {messages ? (
-              <MessageList messages={messages} />
+              <MessageList messages={messages} onRemoveMessage={this.onRemoveMessage} />
             ) : (
               <div>There are no messages ...</div>
             )}
@@ -90,17 +94,20 @@ class MessagesBase extends Component {
   }
 }
 
-const MessageList = ({ messages }) => (
+const MessageList = ({ messages, onRemoveMessage }) => (
   <ul>
     {messages.map(message => (
-      <MessageItem key={message.uid} message={message} />
+      <MessageItem key={message.uid} message={message} onRemoveMessage={onRemoveMessage} />
     ))}
   </ul>
 );
 
-const MessageItem = ({ message }) => (
+const MessageItem = ({ message, onRemoveMessage }) => (
   <li>
     <strong>{message.userId}</strong> {message.text}
+    <button type="button" onClick={() => onRemoveMessage(message.uid)}>
+      Delete
+    </button>
   </li>
 );
 
