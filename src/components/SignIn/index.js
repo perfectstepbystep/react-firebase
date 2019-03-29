@@ -8,6 +8,7 @@ import { withFirebase } from '../Firebase';
 
 import * as ROUTES from '../../constants/routes'
 
+
 const SignInPage = () => (
   <div>
     <h1>SignIn</h1>
@@ -26,11 +27,17 @@ const INITIAL_STATE = {
   error: null,
 };
 
+const ERROR_CODE_ACCOUNT_EXISTS = 'auth/account-exists-with-different-credential';
+const ERROR_MSG_ACCOUNT_EXISTS = `
+  An account with an E-Mail address to this social account already exists. Try
+  to login from this account instead and associate your social accounts on
+  your personal account page.
+`;
+
 class SignInFormBase extends Component {
   constructor(props) {
     super(props);
     this.state = { ...INITIAL_STATE };
-
   }
 
   onSubmit = event => {
@@ -53,11 +60,7 @@ class SignInFormBase extends Component {
   };
 
   render() {
-    const {
-      email,
-      password,
-      error,
-    } = this.state;
+    const { email, password, error } = this.state;
 
     const isInvalid = password === '' || email === '';
 
@@ -90,13 +93,20 @@ class SignInGoogleBase extends Component {
             username: socialAuthUser.user.displayName,
             email: socialAuthUser.user.email,
             roles: [],
+          })
+          .then(() => {
+            this.setState({ error: null });
+            this.props.history.push(ROUTES.HOME);
+          })
+          .catch(error => {
+            this.setState({ error });
           });
       })
-      .then(() => {
-        this.setState({ error: null });
-        this.props.history.push(ROUTES.HOME);
-      })
       .catch(error => {
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
+
         this.setState({ error });
       });
 
@@ -131,13 +141,20 @@ class SignInFacebookBase extends Component {
             username: socialAuthUser.additionalUserInfo.profile.name,
             email: socialAuthUser.additionalUserInfo.profile.email,
             roles: [],
+          })
+          .then(() => {
+            this.setState({ error: null });
+            this.props.history.push(ROUTES.HOME);
+          })
+          .catch(error => {
+            this.setState({ error });
           });
       })
-      .then(() => {
-        this.setState({ error: null });
-        this.props.history.push(ROUTES.HOME);
-      })
       .catch(error => {
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
+
         this.setState({ error });
       });
 
@@ -167,18 +184,25 @@ class SignInTwitterBase extends Component {
   onSubmit = event => {
     this.props.firebase.doSignInWithTwitter()
       .then(socialAuthUser => {
-        return this.props.firebase.user(socialAuthUser.user.uid)
+        this.props.firebase.user(socialAuthUser.user.uid)
           .set({
             username: socialAuthUser.additionalUserInfo.profile.name,
             email: socialAuthUser.additionalUserInfo.profile.email,
             roles: [],
+          })
+          .then(() => {
+            this.setState({ error: null });
+            this.props.history.push(ROUTES.HOME);
+          })
+          .catch(error => {
+            this.setState({ error });
           });
       })
-      .then(() => {
-        this.setState({ error: null });
-        this.props.history.push(ROUTES.HOME);
-      })
       .catch(error => {
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
+
         this.setState({ error });
       });
 
@@ -205,4 +229,4 @@ const SignInTwitter = compose(withRouter, withFirebase,)(SignInTwitterBase);
 
 export default SignInPage;
 
-export { SignInForm, SignInGoogle, SignInFacebook };
+export { SignInForm, SignInGoogle, SignInFacebook, SignInTwitter };

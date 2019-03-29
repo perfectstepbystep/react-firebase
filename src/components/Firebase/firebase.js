@@ -15,6 +15,7 @@ class Firebase {
   constructor() {
     app.initializeApp(config);
 
+    this.emailAuthProvider = app.auth.EmailAuthProvider;
     this.auth = app.auth();
     this.db = app.database();
 
@@ -29,14 +30,6 @@ class Firebase {
 
   doSignInWithEmailAndPassword = (email, password) =>
     this.auth.signInWithEmailAndPassword(email, password);
-
-  doSignOut = () => this.auth.signOut();
-
-  doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
-
-  doPasswordUpdate = password =>
-    this.auth.currentUser.updatePassword(password);
-
   doSignInWithGoogle = () =>
     this.auth.signInWithPopup(this.googleProvider);
 
@@ -45,6 +38,14 @@ class Firebase {
 
   doSignInWithTwitter = () =>
     this.auth.signInWithPopup(this.twitterProvider);
+
+  doSignOut = () => this.auth.signOut();
+
+  doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
+
+  doPasswordUpdate = password =>
+    this.auth.currentUser.updatePassword(password);
+
 
   // *** Merge Auth & DB User API ***
 
