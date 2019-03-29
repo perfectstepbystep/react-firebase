@@ -43,9 +43,13 @@ class Firebase {
 
   doPasswordReset = email => this.auth.sendPasswordResetEmail(email);
 
+  doSendEmailVerification = () =>
+    this.auth.currentUser.sendEmailVerification({
+      url: process.env.REACT_APP_CONFIRMATION_EMAIL_REDIRECT,
+    });
+
   doPasswordUpdate = password =>
     this.auth.currentUser.updatePassword(password);
-
 
   // *** Merge Auth & DB User API ***
 
@@ -66,6 +70,8 @@ class Firebase {
             authUser = {
               uid: authUser.uid,
               email: authUser.email,
+              emailVerified: authUser.emailVerified,
+              providerData: authUser.providerData,
               ...dbUser,
             };
 
