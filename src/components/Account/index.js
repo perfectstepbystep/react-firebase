@@ -4,7 +4,7 @@ import { compose } from 'recompose';
 
 import { PasswordForgetForm } from '../PasswordForget';
 import PasswordChangeForm from '../PasswordChange';
-import { AuthUserContext, withAuthorization, withEmailVerification } from '../Session';
+import { withAuthorization, withEmailVerification } from '../Session';
 import { withFirebase } from "../Firebase";
 
 const SIGN_IN_METHODS = [
