@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { compose } from "recompose";
+import { connect } from 'react-redux';
+import { compose } from 'recompose';
 
 import { PasswordForgetForm } from '../PasswordForget';
 import PasswordChangeForm from '../PasswordChange';
@@ -25,17 +26,13 @@ const SIGN_IN_METHODS = [
   },
 ];
 
-const AccountPage = () => (
-  <AuthUserContext.Consumer>
-    {authUser => (
-      <div>
-        <h1>Account: {authUser.email}</h1>
-        <PasswordForgetForm />
-        <PasswordChangeForm />
-        <LoginManagement authUser={authUser} />
-      </div>
-    )}
-  </AuthUserContext.Consumer>
+const AccountPage = ({ authUser }) => (
+  <div>
+    <h1>Account: {authUser.email}</h1>
+    <PasswordForgetForm />
+    <PasswordChangeForm />
+    <LoginManagement authUser={authUser} />
+  </div>
 );
 
 class LoginManagementBase extends Component {
@@ -53,7 +50,6 @@ class LoginManagementBase extends Component {
   }
 
   fetchSignInMethods = () => {
-    debugger
     this.props.firebase.auth
       .fetchSignInMethodsForEmail(this.props.authUser.email)
       .then(activeSignInMethods =>
@@ -219,4 +215,7 @@ class DefaultLoginToggle extends Component {
 const condition = authUser => authUser !== null;
 const LoginManagement = withFirebase(LoginManagementBase);
 
-export default compose(withEmailVerification, withAuthorization(condition))(AccountPage);
+const mapStateToProps = state => ({ authUser: state.sessionState.authUser, });
+
+export default compose(connect(mapStateToProps),
+  withEmailVerification, withAuthorization(condition))(AccountPage);
